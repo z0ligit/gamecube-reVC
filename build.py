@@ -127,7 +127,7 @@ def build_sd(args):
            os.path.join(ROOT, "tools", "gamecube", "build_sd.py"),
            "--game", game, "--out", out,
            "--txdconv", build_txdconv(), "--keep-sfx-raw"]
-    audio = args.audio or os.path.join(ROOT, "assets", "audio-ogg")
+    audio = args.audio or os.path.join(game, "Audio")
     if os.path.isdir(audio):
         cmd += ["--audio", audio]
     movies = args.movies or os.path.join(ROOT, "assets", "movies")

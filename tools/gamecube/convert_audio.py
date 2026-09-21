@@ -101,8 +101,8 @@ def main():
                     help="sox -C for the radio; 4.5 lands ~140kbps (>=128)")
     ap.add_argument("--sfx-quality", type=float, default=2,
                     help="sox -C for the mono dialogue/ambience files")
-    ap.add_argument("--subdir", default="audio",
-                    help="output subdirectory; the game looks under audio/")
+    ap.add_argument("--subdir", default="Audio",
+                    help="output subdirectory; the game looks under Audio/")
     args = ap.parse_args()
 
     need("ffmpeg")
