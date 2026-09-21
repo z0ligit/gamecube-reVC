@@ -163,6 +163,7 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 	i = 0;
 	if(m_isDamaged)
 		i = m_firstDamaged;
+	/*
 #ifdef GTA_OGC_MAX_LOD
 	// Temporary: always draw the highest-detail atomic that is actually
 	// loaded, whatever the distance. Distance selection is deliberately out of
@@ -178,11 +179,12 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 			return m_atomics[i];
 	return nil;
 #else
+	*/
 	for(; i < m_numAtomics; i++)
 		if(dist < m_lodDistances[i] * TheCamera.LODDistMultiplier)
 			return m_atomics[i];
-	return nil;
-#endif
+	return m_atomics[0];
+//#endif
 }
 
 RpAtomic*
