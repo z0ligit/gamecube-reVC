@@ -115,6 +115,7 @@ enum eGameState
     GS_FRONTEND,
     GS_INIT_PLAYING_GAME,
     GS_PLAYING_GAME,
+    GS_RESTARTING_GAME,
 };
 extern RwUInt32 gGameState;
 

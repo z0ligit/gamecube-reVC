@@ -1373,27 +1373,11 @@ main(int, char *[])
 			printf("GS_INIT_PLAYING_GAME\n");
 			InitialiseGame();
 			FrontEndMenuManager.m_bGameNotLoaded = false;
-			gGameState = GS_PLAYING_GAME;
+			gGameState = GS_RESTARTING_GAME;
 			BootLog("entering game loop");
 			break;
 
-		case GS_PLAYING_GAME:
-			RsEventHandler(rsIDLE, (void *)TRUE);
-			autoCarTestTick();
-			// Service the restart request. Idle() returns before ANY rendering
-			// while one is pending (main.cpp, right after DMAudio.Service) and
-			// expects the platform's game loop to act on it - win.cpp,
-			// glfw.cpp and sdl2.cpp all do, and this skeleton never did.
-			//
-			// DoSettingsBeforeStartingAGame raises m_bWantToRestart the moment
-			// you choose Start New Game, so from that frame on the loop ran
-			// audio, script and cutscenes but presented nothing: the screen
-			// kept whatever was last drawn - the loading splash - while the
-			// game played underneath it, which is exactly how this was
-			// reported. dvd:/autostart.txt hid it completely by jumping
-			// straight to GS_INIT_PLAYING_GAME, so the frontend never ran and
-			// the flag was never raised. That is why it reproduced on other
-			// people's cards and never on the one card that had the file.
+		case GS_RESTARTING_GAME:
 			if(FrontEndMenuManager.m_bWantToRestart || b_FoundRecentSavedGameWantToLoad){
 				if(b_FoundRecentSavedGameWantToLoad){
 					FrontEndMenuManager.m_bWantToRestart = true;
@@ -1412,6 +1396,26 @@ main(int, char *[])
 				FrontEndMenuManager.m_bWantToRestart = false;
 				b_FoundRecentSavedGameWantToLoad = false;
 			}
+			gGameState = GS_PLAYING_GAME;
+			break;
+
+		case GS_PLAYING_GAME:
+			RsEventHandler(rsIDLE, (void *)TRUE);
+			//autoCarTestTick();
+			// Service the restart request. Idle() returns before ANY rendering
+			// while one is pending (main.cpp, right after DMAudio.Service) and
+			// expects the platform's game loop to act on it - win.cpp,
+			// glfw.cpp and sdl2.cpp all do, and this skeleton never did.
+			//
+			// DoSettingsBeforeStartingAGame raises m_bWantToRestart the moment
+			// you choose Start New Game, so from that frame on the loop ran
+			// audio, script and cutscenes but presented nothing: the screen
+			// kept whatever was last drawn - the loading splash - while the
+			// game played underneath it, which is exactly how this was
+			// reported. dvd:/autostart.txt hid it completely by jumping
+			// straight to GS_INIT_PLAYING_GAME, so the frontend never ran and
+			// the flag was never raised. That is why it reproduced on other
+			// people's cards and never on the one card that had the file.
 			break;
 		}
 

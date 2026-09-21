@@ -992,6 +992,7 @@ CMenuManager::DoSettingsBeforeStartingAGame()
 	DMAudio.Service();
 	m_bShutDownFrontEndRequested = true;
 	m_bWantToRestart = true;
+	gGameState = GS_RESTARTING_GAME;
 	DMAudio.SetEffectsFadeVol(0);
 	DMAudio.SetMusicFadeVol(0);
 	for (int i = 0; i < NUM_RADIOS; i++)
