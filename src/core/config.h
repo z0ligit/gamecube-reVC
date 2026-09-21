@@ -457,7 +457,7 @@ enum Config {
 static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually exclusive");
 #endif
 #ifdef PC_MENU
-#define MISSION_REPLAY // mobile feature
+//#define MISSION_REPLAY // mobile feature
 //#define SIMPLER_MISSIONS // apply simplifications from mobile
 #define USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 #endif
