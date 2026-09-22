@@ -12,80 +12,51 @@ build, which enforces the same limits.
 
 Work in progress.
 
-- The game boots and plays from an **SD card** (Wii homebrew loader, or
+- The game boots and plays from an **SD card** or **USB** (without an SD card inserted, check [Known issues](#known-issues)) (Wii homebrew loader, or
   Dolphin).
-- Generating a mini-DVD **ISO that boots on a real GameCube does not work
-  yet**. The ISO9660 path runs under Dolphin, but real-hardware disc boot is
-  an open problem.
 
-## Architecture
+## Dependencies
+The following packages are required(on Ubuntu 26.04 WSL, package names and packages required to be installed may vary depending on your Linux distribution and release):
 
-- **Renderer** — a native GX backend for librw
-  (`vendor/librw/src/gx`). Textures are converted ahead of time to
-  GameCube-native formats (CMPR / RGB5A3) at full original quality; memory
-  pressure is handled by streaming and eviction, not by reducing asset
-  quality. World geometry is quantised to packed int16 vertex streams,
-  static meshes can be replayed as GP display lists, and lighting is
-  implemented with TEV stages (prelight plus timecycle ambient, with
-  optional env-map, rim-light and lightmap stages).
-- **Audio** — streamed music, radio and speech are Ogg Vorbis, decoded with
-  Tremor (fixed-point) on a dedicated thread so decoding never interrupts
-  the game frame. Mixing uses AESND's 32 hardware voices. Mission speech
-  (IMA ADPCM) is cached in ARAM. FMVs are decoded with Theora.
-- **Filesystem and streaming** — an ISO9660 driver written for this port
-  (`src/skel/gamecube/dvdfs.c`) plus libfat SD support, with sector-aligned
-  DMA reads and a streaming layer tuned for the 24 MB memory budget.
-- **Frontend** — a GameCube controls page with a 3D controller model, and
-  help boxes that display the port's actual button bindings as coloured
-  GameCube button badges.
+- devkitPro(can be installed with [this](https://apt.devkitpro.org/install-devkitpro-pacman) shell script, the webpage won't allow you to wget it, you have to manually copy and paste it to your text editor of choice and then chmod +x the file)
+- gamecube-dev and/or wii-dev packages (from dkp-pacman)
+- ppc-libvorbisidec and ppc-libogg (from dkp-pacman)
+- libogg-dev, libvorbis-dev
+- ffmpeg
+- sox
+- gcc, g++
+- cmake
+- ninja-build
+
+If you have devkitPro installed in a non-standard location, set the `DEVKITPRO` environment variable.
+
+## Building libtheora
+An example program from libtheora is required for converting the intro videos.
+```bash
+wget http://downloads.xiph.org/releases/theora/libtheora-1.2.0.tar.gz && \
+tar axvf libtheora-1.2.0.tar.gz && \
+cd libtheora-1.2.0 && \
+./configure && \
+make && \
+export THEORA_ENCODER_EXAMPLE=$(pwd)/examples/encoder_example && \
+cd ..
+```
+
+Do not move or delete the folder named `libtheora-1.2.0` until after you converted the game files in the [Game data](#game-data) step.
 
 ## Building
 
 ```bash
-git clone --recursive https://github.com/origami-ltd/gamecube-reVC.git
+git clone --recursive https://github.com/z0ligit/gamecube-reVC
 cd gamecube-reVC
-python3 build.py --setup    # installs the dependencies for your OS
-python3 build.py            # GameCube DOL -> build/cube/src/reVC.dol
-python3 build.py wii        # Wii dev DOL  -> build/wii/src/reVC.dol
+python3 build.py wii        # Wii dev DOL  -> build/wii/src/reVC.dol (Works, but not tested thoroughly)
+python3 build.py            # GameCube DOL -> build/cube/src/reVC.dol (I couldn't get it working)
 ```
 
-The same commands work on macOS, Linux and Windows. `--setup` uses the
-system package manager (Homebrew, apt, pacman or winget) for CMake and
-Ninja, then installs [devkitPro](https://devkitpro.org/wiki/Getting_Started)
-with the `gamecube-dev` and `wii-dev` package groups. All other build
-dependencies are included in the repository (the librw fork with the GX
-backend, the xiph ogg/opus/opusfile submodules, and a PowerPC libtheora
-build with a Wii toolchain file under `vendor/portlibs/`).
-
-### Installing the dependencies manually
-
-Requirements: Python 3, CMake ≥ 3.13, Ninja, and devkitPro with the
-GameCube/Wii toolchains.
-
-- **macOS** — `brew install cmake ninja`, then install
-  [devkitPro pacman](https://github.com/devkitPro/pacman/releases)
-  (`.pkg` installer) and run
-  `sudo dkp-pacman -Sy gamecube-dev wii-dev`.
-- **Debian/Ubuntu** — `sudo apt-get install cmake ninja-build`, then run the
-  [devkitPro pacman bootstrap](https://apt.devkitpro.org/install-devkitpro-pacman)
-  and `sudo dkp-pacman -Sy gamecube-dev wii-dev`.
-- **Arch Linux** — `sudo pacman -S cmake ninja`, add the
-  [devkitPro repositories](https://devkitpro.org/wiki/devkitPro_pacman) to
-  `/etc/pacman.conf` and `sudo pacman -Sy gamecube-dev wii-dev`.
-- **Windows** — `winget install Kitware.CMake Ninja-build.Ninja`, then run
-  the [devkitPro installer](https://github.com/devkitPro/installer/releases)
-  and select the GameCube and Wii development packages.
-
-If devkitPro is installed somewhere non-standard, set the `DEVKITPRO`
-environment variable to its root.
-
 ## Game data
+This repository does not contain any game files. A legally owned copy of Grand Theft Auto: Vice City is required.
 
-This repository contains no game assets. A legally owned copy of Grand
-Theft Auto: Vice City is required.
-
-Copy the game installation to `assets/GTAVC` (the [`assets/`](assets/)
-folder is git-ignored) and run:
+Copy the game installation to `assets/GTAVC` (the [`assets/`](assets/) folder is git-ignored) and run:
 
 ```bash
 python3 build.py sd         # SD card tree -> assets/sd-tree
@@ -116,11 +87,55 @@ work; `--game`, `--out`, `--audio` and `--movies` override the defaults).
    FAT32 SD card. The game reads them from the root: the card must contain
    `/models/gta3.img`, not `/sd-tree/models/gta3.img`.
 2. Copy `build/wii/src/reVC.dol` to the card as `apps/reVC/boot.dol`.
-3. Launch reVC from the Homebrew Channel.
+3. Launch the game from a Wii file manager(eg. WiiXplorer).
 
 ### GameCube
 
-Real-hardware disc boot is not functional yet — see [Status](#status).
+Real-hardware disc boot is not functional yet — see [Known issues](#known-issues).
+
+## Known issues
+
+The game does not boot up if you play on USB but also have an SD card inserted.
+- The game only checks if an SD card is present and is formatted as FAT32. The game only "fails over" to USB if a card is not present and not if the SD card does not contain the game files required to start the game. If you want to play on USB, eject your SD card from the console before starting the game. 
+
+The game only starts if the game files are in the root of the SD card/USB drive.
+- Will relocate the to-be-mounted folder to /apps/revcgc/, avoiding a possible conflict with the Wii port. 
+
+Conversion scripts are case sensitive
+- I hotfixed it for the copy I have in [this](https://github.com/z0ligit/gamecube-reVC/commit/092f034d32dad4702fc102a3005d3319cec39821) commit, the real solution will be making the conversion scripts case insensitive.
+
+Sometimes during RenderFadingAtomic() the game gives the GetAtomicFromDistance() function a distance variable so large that the if statement inside the for loop will never be true. In those cases the function returns a nil, which crashes the game with a DSI exception every time. the crash was most common around Cortez's boat.
+- Hotfixed in [this](https://github.com/z0ligit/gamecube-reVC/commit/f7fb7181fac9c4864a663b50cf69fc986d5c783a) commit, the real solution will be figuring how the game calculates the unrealistic dist variable.
+
+Over budget error by build_sd.py
+- The game doesn't use the more space efficient .pak file for sound effects, using it should bring the folder size under the budget. This doesn't cause issues on SD cards or on USB but it should be dealt with before building ISOs.
+
+An untested ISO builder exists in the repo, but it only works on MacOS.
+- A more platform inspecific solution is yet to be built.
+
+Error submitting packet to decoder: Invalid data found when processing input
+- This doesn't seem to cause any issues, but it is something to investigate maybe.
+
+## Architecture
+
+- **Renderer** — a native GX backend for librw
+  (`vendor/librw/src/gx`). Textures are converted ahead of time to
+  GameCube-native formats (CMPR / RGB5A3) at full original quality; memory
+  pressure is handled by streaming and eviction, not by reducing asset
+  quality. World geometry is quantised to packed int16 vertex streams,
+  static meshes can be replayed as GP display lists, and lighting is
+  implemented with TEV stages (prelight plus timecycle ambient, with
+  optional env-map, rim-light and lightmap stages).
+- **Audio** — streamed music, radio and speech are Ogg Vorbis, decoded with
+  Tremor (fixed-point) on a dedicated thread so decoding never interrupts
+  the game frame. Mixing uses AESND's 32 hardware voices. Mission speech
+  (IMA ADPCM) is cached in ARAM. FMVs are decoded with Theora.
+- **Filesystem and streaming** — an ISO9660 driver written for this port
+  (`src/skel/gamecube/dvdfs.c`) plus libfat SD support, with sector-aligned
+  DMA reads and a streaming layer tuned for the 24 MB memory budget.
+- **Frontend** — a GameCube controls page with a 3D controller model, and
+  help boxes that display the port's actual button bindings as coloured
+  GameCube button badges.
 
 ## Credits
 
