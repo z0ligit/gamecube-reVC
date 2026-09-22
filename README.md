@@ -107,6 +107,9 @@ Conversion scripts are case sensitive
 Sometimes during RenderFadingAtomic() the game gives the GetAtomicFromDistance() function a distance variable so large that the if statement inside the for loop will never be true. In those cases the function returns a nil, which crashes the game with a DSI exception every time. the crash was most common around Cortez's boat.
 - Hotfixed in [this](https://github.com/z0ligit/gamecube-reVC/commit/f7fb7181fac9c4864a663b50cf69fc986d5c783a) commit, the real solution will be figuring how the game calculates the unrealistic dist variable.
 
+The autosave feature sometimes crashes the game on a real Wii.
+- Disabled the feature it in [this](https://github.com/z0ligit/gamecube-reVC/commit/4a4a983ae871ebbc5254f83a5c12e514e5d513c6) commit. I don't have the resources to try to fix this.
+
 Over budget error by build_sd.py
 - The game doesn't use the more space efficient .pak file for sound effects, using it should bring the folder size under the budget. This doesn't cause issues on SD cards or on USB but it should be dealt with before building ISOs.
 
