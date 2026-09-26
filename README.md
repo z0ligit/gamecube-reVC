@@ -111,7 +111,7 @@ The autosave feature sometimes crashes the game on a real Wii.
 - Disabled the feature it in [this](https://github.com/z0ligit/gamecube-reVC/commit/4a4a983ae871ebbc5254f83a5c12e514e5d513c6) commit. I don't have the resources to try to fix this.
 
 Over budget error by build_sd.py
-- The game doesn't use the more space efficient .pak file for sound effects, using it should bring the folder size under the budget. This doesn't cause issues on SD cards or on USB but it should be dealt with before building ISOs.
+- This doesn't cause issues on SD cards or on USB but it should be dealt with before building ISOs.
 
 An untested ISO builder exists in the repo, but it only works on MacOS.
 - A more platform inspecific solution is yet to be built.

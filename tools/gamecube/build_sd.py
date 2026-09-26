@@ -374,14 +374,10 @@ def main():
     # all 9,941 random-access samples before removing the 340MB raw bank.
     audio_dir = os.path.join(args.out, "Audio")
     raw = os.path.join(args.game, "Audio", "sfx.RAW")
-    rawdst = os.path.join(args.out, "Audio", "sfx.RAW")
     sdt = os.path.join(args.game, "Audio", "sfx.SDT")
     sdtdst = os.path.join(args.out, "Audio", "sfx.SDT")
-    shutil.copyfile(raw, rawdst)
     shutil.copyfile(sdt, sdtdst)
-    '''
-    I'll figure out the pak stuff later this week maybe
-    pak = os.path.join(audio_dir, "sfx.pak")
+    pak = os.path.join(args.out, "Audio", "sfx.pak")
     if not args.keep_sfx_raw and os.path.isfile(raw) and os.path.isfile(sdt):
         packer = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               "pack_sfx.py")
@@ -394,7 +390,6 @@ def main():
         if subprocess.run(cmd).returncode != 0:
             sys.exit("sfx.pak failed verification; refusing to remove sfx.raw")
         os.remove(raw)
-    '''
     total = 0
     for root, _, files in os.walk(args.out):
         for f in files:
